@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>GitHub Repo</title>
+    <style>
+        #user{
+            display:flex;
+            justify-content:center;
+            gap:2
+        }
+        #repo{
+            display:flex;
+            flex-wrap: wrap;
+            justify-content:center;
+            
+        }
+        .user-card {
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 16px;
+            margin: 16px;
+            width: 450px;
+            height:150px;
+            
+          }
+      
+          .user-card h2 {
+            margin-bottom: 8px;
+            color:  #007bff;
+          }
+      
+          .user-card p {
+            margin-bottom: 0;
+          }
+          .user-card h3 {
+            background-color: #007bff;
+            color: #fff;
+            display: inline-block;
+            width:auto;
+            padding:3px;
+            border-radius:5px;
+          }
+          #pagination-container {
+            margin-top: 20px;
+            display:flex;
+            justify-content:center;
+           }
+      
+          .pagination-button {
+            margin: 0 5px;
+            cursor: pointer;
+            padding: 5px 10px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+          }
+
+          .pagination-button:hover {
+            background-color: #0056b3;
+          }
+    </style>
+    
+  </head>
+  <body>
+
+    <div id="user"></div>
+    <div id="repo"></div>
+    <div id="pagination-container"></div>
+	<script>
+        const user = document.getElementById('user');
+        const repo = document.getElementById('repo');
+
+        const itemsPerPage = 10;
+        let currentPage = 1;
+        let userData =[];
+
+  function fetchUserRepo(){
+    fetch('https://api.github.com/users/CodeWithHarry/repos')
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+    return response.json();
+  })
+  .then(data =>{
+    allUserData = data;
+    const avatarUrl = allUserData[0].owner.avatar_url;
+    const login = allUserData[0].owner.login;
+
+    const userImage = document.createElement('img');
+    userImage.src = avatarUrl; 
+    userImage.alt = 'User Avatar';
+
+   
+    const userName = document.createElement('h1');
+    userName.textContent = `${login}`;
+    user.appendChild(userImage);
+    user.appendChild(userName);
+      displayCurrentPage();
+    }) 
+    .catch(error => {
+          console.error('Error:', error);
+        });
+  }
+
+
+function displayCurrentPage(){
+    
+  const startIdx = (currentPage - 1) * itemsPerPage;
+  const endIdx = startIdx + itemsPerPage;
+  const userDataArray = allUserData.slice(startIdx, endIdx);
+
+  const userContainer = document.getElementById('user-container');
+  repo.innerHTML='';
+  
+
+  userDataArray.forEach(repository => {
+        
+        const fullName = repository.full_name;
+        
+        const description = repository.description; 
+        const language = repository.language;
+
+        const userCard = document.createElement('div');
+      userCard.classList.add('user-card');
+
+     
+      const title = document.createElement('h2');
+      title.textContent = fullName;
+
+      
+      const desc = document.createElement('p');
+      desc.textContent = description; 
+
+     
+      const lang = document.createElement('h3');
+      lang.classList.add('lang');
+      lang.textContent = `${language}`; 
+
+      
+      userCard.appendChild(title);
+      userCard.appendChild(desc);
+      userCard.appendChild(lang);
+
+      
+      repo.appendChild(userCard);
+
+})
+renderPagination(allUserData.length)
+}
+  function renderPagination(totalItems) {
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+    const paginationContainer = document.getElementById('pagination-container');
+    paginationContainer.innerHTML = ''; 
+  
+    for (let i = 1; i <= totalPages; i++) {
+      const button = document.createElement('button');
+      button.classList.add('pagination-button');
+      button.textContent = i;
+  
+      button.addEventListener('click', () => {
+        currentPage = i;
+        displayCurrentPage(currentPage);
+      });
+  
+      paginationContainer.appendChild(button);
+    }
+  }
+  fetchUserRepo();
+  
+  
+    </script>
+  </body>
+</html>
